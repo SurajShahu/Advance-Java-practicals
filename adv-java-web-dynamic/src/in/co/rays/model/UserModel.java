@@ -1,4 +1,4 @@
-package co.in.rays.user;
+package in.co.rays.model;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,18 +6,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 
+import in.co.rays.bean.UserBean;
 import in.co.rays.util.JDBCDataSource;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 public class UserModel {
 	public void add(UserBean bean) throws Exception {
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/advance11", "root", "root");
+
+		Connection conn = JDBCDataSource.getConnection();
+
 		PreparedStatement pstmt = conn.prepareStatement("insert into user values(?,?,?,?,?,?,?)");
 		int pk = nextPk();
-
 		pstmt.setInt(1, pk);
 		pstmt.setString(2, bean.getFirstName());
 		pstmt.setString(3, bean.getLastName());
@@ -30,11 +30,9 @@ public class UserModel {
 	}
 
 	public void update(UserBean bean) throws Exception {
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/advance11", "root", "root");
+		Connection conn = JDBCDataSource.getConnection();
 		PreparedStatement pstmt = conn.prepareStatement(
 				"update user set first_name=?,last_name=?,login_id=?,password=?,dob=?,address=? where id=?");
-
 		pstmt.setString(1, bean.getFirstName());
 		pstmt.setString(2, bean.getLastName());
 		pstmt.setString(3, bean.getLoginId());
@@ -48,8 +46,7 @@ public class UserModel {
 	}
 
 	public void delete(int id) throws Exception {
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/advance11", "root", "root");
+		Connection conn = JDBCDataSource.getConnection();
 		PreparedStatement pstmt = conn.prepareStatement("delete from user where id=?");
 		pstmt.setInt(1, id);
 		int i = pstmt.executeUpdate();
@@ -57,11 +54,6 @@ public class UserModel {
 	}
 
 	public List searchAll() throws Exception {
-		/*
-		 * Class.forName("com.mysql.cj.jdbc.Driver"); Connection conn =
-		 * DriverManager.getConnection("jdbc:mysql://localhost:3306/advance11", "root",
-		 * "root");
-		 */
 		Connection conn = JDBCDataSource.getConnection();
 		PreparedStatement pstmt = conn.prepareStatement("select * from user");
 		ResultSet rs = pstmt.executeQuery();
@@ -86,10 +78,10 @@ public class UserModel {
 	}
 
 	public List search(UserBean bean, int pageNo, int pageSize) throws Exception {
+		Connection conn = JDBCDataSource.getConnection();
 		StringBuffer sql = new StringBuffer("select * from user where 1=1");
 		List list = new ArrayList();
 		// UserBean bean=new UserBean();
-		Connection conn = JDBCDataSource.getConnection();
 		if (bean != null) {
 			if (bean.getId() > 0) {
 				sql.append(" and id" + bean.getId());
@@ -98,13 +90,13 @@ public class UserModel {
 				sql.append(" and first_name like '" + bean.getFirstName() + "%'");
 			}
 			if (bean.getDob() != null) {
-				sql.append(" and dob='" + bean.getDob() + "'");
-			}
-			if (pageNo > 0 && pageSize > 0) {
-				pageNo = (pageNo - 1) * pageSize;
-				sql.append(" limit " + pageNo + "," + pageSize);
+				sql.append(" and dob='" + new java.sql.Date(bean.getDob().getTime()) + "'");
 			}
 
+		}
+		if (pageNo > 0 && pageSize > 0) {
+			pageNo = (pageNo - 1) * pageSize;
+			sql.append(" limit " + pageNo + "," + pageSize);
 		}
 
 		System.out.println("SQL==>" + sql);
@@ -131,9 +123,7 @@ public class UserModel {
 
 	{
 		int pk = 0;
-
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/advance11", "root", "root");
+		Connection conn = JDBCDataSource.getConnection();
 		PreparedStatement pstmt = conn.prepareStatement("select max(id) from user");
 		ResultSet rs = pstmt.executeQuery();
 		while (rs.next()) {
@@ -143,7 +133,7 @@ public class UserModel {
 		return pk + 1;
 	}
 
-	public UserBean findByLogin(String loginId) throws Exception {
+	public UserBean searchByLogin(String loginId) throws Exception {
 
 		UserBean bean = new UserBean();
 		Connection conn = JDBCDataSource.getConnection();
@@ -165,13 +155,15 @@ public class UserModel {
 	}
 
 	public UserBean authenticate(String loginId, String password) throws Exception {
-		UserBean bean = new UserBean();
+
 		Connection conn = JDBCDataSource.getConnection();
 		PreparedStatement pstmt = conn.prepareStatement("select * from user where login_id=? and password=?");
 		pstmt.setString(1, loginId);
 		pstmt.setString(2, password);
 		ResultSet rs = pstmt.executeQuery();
+		UserBean bean = null;
 		while (rs.next()) {
+			bean = new UserBean();
 			bean.setId(rs.getInt(1));
 			bean.setFirstName(rs.getString(2));
 			bean.setLastName(rs.getString(3));

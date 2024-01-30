@@ -9,10 +9,10 @@ import java.util.List;
 public class TestUser {
 	public static void main(String[] args) throws Exception {
 		//testAdd();
-		testSearchAll();
+		//testSearchAll();
 		//testUpdate();
 		//testDelete();
-		//testSearch();
+		testSearch();
 		//testSearchByLogin();
 		//testAuthenticate();
 		//testSearchByPk();
@@ -20,7 +20,7 @@ public class TestUser {
 
 	private static void testSearchByPk() throws Exception {
 		UserModel model=new UserModel();
-		UserBean bean=model.searchByPk(6);
+		UserBean bean=model.findByPk(6);
 		if(bean!=null && bean.getId()>0)
 		{
 			System.out.print(bean.getId());
@@ -57,7 +57,7 @@ public class TestUser {
 		UserBean bean=new UserBean();
 		UserModel model=new UserModel();
 		
-		bean=model.searchByLogin("air@g.com");
+		bean=model.findByLogin("air@g.com");
 		if(bean!=null)
 		{
 			System.out.print(bean.getId());
@@ -107,7 +107,7 @@ public class TestUser {
 	private static void testDelete() throws Exception{
 		UserModel model=new UserModel();
 		UserBean existBean=new UserBean();
-		existBean=model.searchByPk(10);
+		existBean=model.findByPk(10);
 		if(existBean!=null && existBean.getId()>0)
 		{
 			model.delete(existBean.getId());	
@@ -131,23 +131,18 @@ public class TestUser {
 		model.update(bean);
 	}
 
-	private static void testSearchAll() throws Exception {
-		UserModel user = new UserModel();
-
-		List list = new ArrayList();
-		list = user.searchAll();
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			UserBean bean = (UserBean) it.next();
-			System.out.print(bean.getId());
-			System.out.print("\t" + bean.getFirstName());
-			System.out.print("\t" + bean.getLastName());
-			System.out.print("\t" + bean.getLoginId());
-			System.out.print("\t" + bean.getPassword());
-			System.out.print("\t" + bean.getDob());
-			System.out.println("\t" + bean.getAddress());
-		}
-	}
+	/*
+	 * private static void testSearchAll() throws Exception { UserModel user = new
+	 * UserModel();
+	 * 
+	 * List list = new ArrayList(); list = user.searchAll(); Iterator it =
+	 * list.iterator(); while (it.hasNext()) { UserBean bean = (UserBean) it.next();
+	 * System.out.print(bean.getId()); System.out.print("\t" + bean.getFirstName());
+	 * System.out.print("\t" + bean.getLastName()); System.out.print("\t" +
+	 * bean.getLoginId()); System.out.print("\t" + bean.getPassword());
+	 * System.out.print("\t" + bean.getDob()); System.out.println("\t" +
+	 * bean.getAddress()); } }
+	 */
 
 	private static void testAdd() throws Exception {
 		String dob="23/10/1990";
@@ -161,7 +156,7 @@ public class TestUser {
 		bean.setDob(new SimpleDateFormat("dd/MM/yyyy").parse(dob));
 		bean.setAddress("Indore");
 		
-		UserBean existBean=user.searchByLogin(bean.getLoginId());
+		UserBean existBean=user.findByLogin(bean.getLoginId());
 		if(existBean!=null)
 		{
 			System.out.println("Login id already exist..!");
